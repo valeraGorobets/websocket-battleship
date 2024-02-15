@@ -3,6 +3,8 @@ import { DB } from '../db/db';
 import { Player } from './player.models';
 import { Room } from './room.models';
 
+export const FIELD_DIMENSION: number = 10;
+
 export enum RequestType {
 	reg = 'reg',
 	create_game = 'create_game',
@@ -27,6 +29,11 @@ export interface IControllerOptions {
 	connectionToSocketDB: DB<WebSocket>;
 	roomDB: DB<Room>;
 	request?: Request;
+}
+
+export interface IPosition {
+	x: number;
+	y: number;
 }
 
 abstract class CommunicationProtocol {

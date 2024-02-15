@@ -2,8 +2,8 @@ import { generateId } from '../services/utils';
 
 export class Player {
 	public readonly index: number = generateId();
-	public readonly name: string = '';
-	public readonly hash: string = '';
+	public readonly name!: string;
+	public readonly hash!: string;
 
 	constructor(credentials: Credentials) {
 		this.name = credentials.name;
@@ -12,8 +12,8 @@ export class Player {
 }
 
 export class Credentials {
-	public readonly name: string = '';
-	private readonly password: string = '';
+	public readonly name!: string;
+	private readonly password!: string;
 
 	constructor(data: string) {
 		const parsedData = JSON.parse(data);

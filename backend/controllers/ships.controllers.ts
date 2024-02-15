@@ -4,6 +4,7 @@ import { incorrectInputController, sendResponse } from './common.contollers';
 import { WebSocket } from 'ws';
 import { Room } from '../models/room.models';
 import { AddShipsData, ShipsState } from '../models/ship.models';
+import { turnResponseHandler } from './game.controllers';
 
 export function addShipsController(controllerOptions: IControllerOptions): void {
 	const {
@@ -15,7 +16,6 @@ export function addShipsController(controllerOptions: IControllerOptions): void 
 		ships: addShipsData.ships,
 		indexPlayer: addShipsData.indexPlayer,
 	})
-	console.log(addShipsData);
 	const room: Room | undefined = roomDB.get(addShipsData.gameId);
 
 	if (!room) {
@@ -65,5 +65,6 @@ export function tryStartGameResponseHandler(controllerOptions: IControllerOption
 			const ws: WebSocket = connectionToSocketDB.get(playerConnection)!;
 			sendResponse(ws, createGameResponse);
 		});
+		turnResponseHandler(activeRoom, controllerOptions);
 	}
 }
