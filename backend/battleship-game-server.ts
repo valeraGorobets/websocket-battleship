@@ -1,14 +1,23 @@
 import { MessageEvent, WebSocket, WebSocketServer } from 'ws';
-import crypto from 'node:crypto';
 import { resolveControllerForRequest } from './services/type-resolver.service';
 import { IControllerOptions, Request, TController } from './models/shared.models';
-import { controllerAdapter, wsCloseController } from './controllers/common.contollers';
+import { wsCloseController } from './controllers/common.contollers';
+import { DB } from './db/db';
+import { Player } from './models/player.models';
+import { Room } from './models/room.models';
+import { generateId } from './services/utils';
 
 export function launchBattleShipGameServer(port: number): void {
+	const playerDB: DB<Player> = new DB();
+	const connectionToPlayerDB: DB<number> = new DB();
+	const roomDB: DB<Room> = new DB();
+	const connectionToSocketDB: DB<WebSocket> = new DB();
+
 	const wss = new WebSocketServer({ port });
 	wss.on('connection', (ws: WebSocket) => {
-		const wsID: string = crypto.randomUUID();
-		console.log(`New WS connection to port ${ port }: ${ wsID }`);
+		const connectionId: number = generateId();
+		connectionToSocketDB.add(connectionId, ws);
+		console.log(`New WS connection to port ${ port }: ${ connectionId }`);
 
 		ws.on('message', (message: MessageEvent) => {
 			console.log(`Received message: ${ message }`);
@@ -16,11 +25,15 @@ export function launchBattleShipGameServer(port: number): void {
 				const request: Request = new Request(message.toString());
 
 				const controllerOptions: IControllerOptions = {
+					connectionId,
 					request,
-					ws,
+					connectionToSocketDB,
+					playerDB,
+					connectionToPlayerIndexDB: connectionToPlayerDB,
+					roomDB,
 				};
 				const controller: TController = resolveControllerForRequest(request);
-				controllerAdapter(controller, controllerOptions);
+				controller(controllerOptions);
 			} catch (error) {
 				console.log(`Error during parsing message: ${ error }`);
 				ws.send(`Error during parsing message: ${ error }`);
@@ -28,8 +41,14 @@ export function launchBattleShipGameServer(port: number): void {
 		});
 
 		ws.on('close', () => {
-			console.log(`Closing WS: ${ wsID }`);
-			wsCloseController();
+			const controllerOptions: IControllerOptions = {
+				connectionId,
+				connectionToSocketDB,
+				playerDB,
+				connectionToPlayerIndexDB: connectionToPlayerDB,
+				roomDB,
+			};
+			wsCloseController(controllerOptions);
 		});
 	});
 }

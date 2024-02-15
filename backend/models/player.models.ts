@@ -1,19 +1,26 @@
+import { generateId } from '../services/utils';
+
 export class Player {
+	public readonly index: number = generateId();
 	public readonly name: string = '';
-	private readonly password: string = '';
+	public readonly hash: string = '';
 
 	constructor(credentials: Credentials) {
 		this.name = credentials.name;
-		this.password = credentials.password;
+		this.hash = credentials.getHash();
 	}
 }
 
 export class Credentials {
-	public name: string = '';
-	public password: string = '';
+	public readonly name: string = '';
+	private readonly password: string = '';
 
 	constructor(data: string) {
-		const parsedMessage = JSON.parse(data);
-		Object.assign(this, parsedMessage);
+		const parsedData = JSON.parse(data);
+		Object.assign(this, parsedData);
+	}
+
+	public getHash(): string {
+		return `${ this.name }_${ this.password }`;
 	}
 }
