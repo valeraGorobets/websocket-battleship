@@ -8,6 +8,7 @@ export enum RequestType {
 	create_game = 'create_game',
 	create_room = 'create_room',
 	add_user_to_room = 'add_user_to_room',
+	add_ships = 'add_ships',
 	start_game = 'start_game',
 	turn = 'turn',
 	attack = 'attack',

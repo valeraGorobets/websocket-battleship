@@ -2,6 +2,7 @@ import { registrationController } from '../controllers/player.controllers';
 import { Request, RequestType, TController } from '../models/shared.models';
 import { pageNotFoundController } from '../controllers/common.contollers';
 import { addUserToRoomController, createRoomController } from '../controllers/room.controllers';
+import { addShipsController } from '../controllers/ships.controllers';
 
 class TypeConfig {
 	public type?: RequestType;
@@ -24,6 +25,10 @@ const TYPE_CONFIGS: TypeConfig[] = [
 	new TypeConfig({
 		type: RequestType.add_user_to_room,
 		controller: addUserToRoomController,
+	}),
+	new TypeConfig({
+		type: RequestType.add_ships,
+		controller: addShipsController,
 	}),
 ];
 
