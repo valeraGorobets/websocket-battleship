@@ -1,10 +1,11 @@
-import { IControllerOptions, RequestType, Response } from '../models/shared.models';
+import { IControllerOptions, IPosition, RequestType, Response } from '../models/shared.models';
 import { Player } from '../models/player.models';
 import { incorrectInputController, sendResponse } from './common.contollers';
 import { WebSocket } from 'ws';
 import { Room } from '../models/room.models';
-import { AddShipsData, ShipsState } from '../models/ship.models';
+import { AddShipsData } from '../models/ship.models';
 import { turnResponseHandler } from './game.controllers';
+import { GameState } from '../models/game.models';
 
 export function addShipsController(controllerOptions: IControllerOptions): void {
 	const {
@@ -12,10 +13,11 @@ export function addShipsController(controllerOptions: IControllerOptions): void 
 		roomDB
 	}: IControllerOptions = controllerOptions;
 	const addShipsData: AddShipsData = new AddShipsData(request!.data);
-	const shipsState: ShipsState = new ShipsState({
+	const gameState: GameState = new GameState({
 		ships: addShipsData.ships,
 		indexPlayer: addShipsData.indexPlayer,
-	})
+		shotPositions: [],
+	});
 	const room: Room | undefined = roomDB.get(addShipsData.gameId);
 
 	if (!room) {
@@ -24,9 +26,9 @@ export function addShipsController(controllerOptions: IControllerOptions): void 
 
 	const updatedRoom: Room = new Room({
 		...room!,
-		shipsStates: [
-			...(room!.shipsStates || []),
-			shipsState,
+		gameStates: [
+			...(room!.gameStates || []),
+			gameState,
 		]
 	})
 
@@ -48,23 +50,23 @@ export function tryStartGameResponseHandler(controllerOptions: IControllerOption
 			roomUsers.length === 2
 			&& roomUsers.find(({ index }: Player) => index === playerId),
 		)!;
-	if (activeRoom.shipsStates?.length === 2) {
-		activeRoom.shipsStates.forEach((shipsState: ShipsState) => {
+	if (activeRoom.gameStates?.length === 2) {
+		activeRoom.gameStates.forEach((gameState: GameState) => {
 			const createGameResponse: Response = new Response({
 				type: RequestType.start_game,
 				data: {
-					ships: shipsState.ships,
-					currentPlayerIndex: shipsState.indexPlayer,
+					ships: gameState.ships,
+					currentPlayerIndex: gameState.indexPlayer,
 				},
 			});
 
 			const playerConnection: number = connectionToPlayerIndexDB
 				.entries()
-				.filter(([ _connectionId, playerIndex ]: [ number, number ]) => playerIndex === shipsState.indexPlayer)![0][0];
+				.filter(([ _connectionId, playerIndex ]: [ number, number ]) => playerIndex === gameState.indexPlayer)![0][0];
 
 			const ws: WebSocket = connectionToSocketDB.get(playerConnection)!;
 			sendResponse(ws, createGameResponse);
 		});
-		turnResponseHandler(activeRoom, controllerOptions);
+		turnResponseHandler(activeRoom, false, controllerOptions);
 	}
 }

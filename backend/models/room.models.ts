@@ -1,18 +1,20 @@
 import { Player } from './player.models';
 import { generateId } from '../services/utils';
-import { ShipsState } from './ship.models';
+
+import { GameState } from './game.models';
 
 export class Room {
 	public roomId: number = generateId();
 	public roomUsers: Player[] = [];
-	public shipsStates?: ShipsState[];
-	private currentPlayerIndex?: number;
+	public gameStates?: GameState[];
+	private currentPlayerIndex: number = 0;
 
 	constructor(room: Partial<Room> = {}) {
 		Object.assign(this, room);
+		this.setNextPlayerIndex();
 	}
 
-	public getNextPlayerIndex(): number {
+	public setNextPlayerIndex(): void {
 		if (!this.currentPlayerIndex) {
 			this.currentPlayerIndex = this.roomUsers[0].index;
 		} else {
@@ -20,7 +22,9 @@ export class Room {
 				? this.roomUsers[1].index
 				: this.roomUsers[0].index;
 		}
+	}
 
+	public getCurrentPlayerIndex(): number {
 		return this.currentPlayerIndex;
 	}
 }

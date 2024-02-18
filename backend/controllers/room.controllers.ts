@@ -51,9 +51,13 @@ export function addUserToRoomController(controllerOptions: IControllerOptions): 
 
 export function updateRoomResponseHandler(ws: WebSocket, controllerOptions: IControllerOptions): void {
 	const { roomDB }: IControllerOptions = controllerOptions;
+	const roomData: any[] = roomDB
+		.values()
+		.filter(({ roomUsers }: Room) => roomUsers.length === 1)
+		.map(({ roomId, roomUsers }: Room) =>({ roomId, roomUsers }));
 	const updateRoomResponse: Response = new Response({
 		type: RequestType.update_room,
-		data: roomDB.values().filter(({ roomUsers }: Room) => roomUsers.length === 1),
+		data: roomData,
 	});
 
 	sendResponse(ws, updateRoomResponse);

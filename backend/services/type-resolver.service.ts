@@ -3,7 +3,7 @@ import { Request, RequestType, TController } from '../models/shared.models';
 import { pageNotFoundController } from '../controllers/common.contollers';
 import { addUserToRoomController, createRoomController } from '../controllers/room.controllers';
 import { addShipsController } from '../controllers/ships.controllers';
-import { attackController } from '../controllers/game.controllers';
+import { attackController, randomAttackController } from '../controllers/game.controllers';
 
 class TypeConfig {
 	public type?: RequestType;
@@ -34,6 +34,10 @@ const TYPE_CONFIGS: TypeConfig[] = [
 	new TypeConfig({
 		type: RequestType.attack,
 		controller: attackController,
+	}),
+	new TypeConfig({
+		type: RequestType.randomAttack,
+		controller: randomAttackController,
 	}),
 ];
 

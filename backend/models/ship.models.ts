@@ -10,7 +10,7 @@ export enum ShipType {
 
 export class CoordinateStatus {
 	public position!: IPosition;
-	public attackStatus?: AttackStatus = undefined;
+	public status?: AttackStatus = undefined;
 
 	constructor(coordinateStatus: CoordinateStatus) {
 		Object.assign(this, coordinateStatus);
@@ -85,15 +85,6 @@ export class Ship {
 
 	private isCoordinateOfAShip({ x, y }: IPosition): boolean {
 		return this.shipCoordinateStatuses.some(({ position }: CoordinateStatus) => position.x === x && position.y === y);
-	}
-}
-
-export class ShipsState {
-	public ships!: Ship[];
-	public indexPlayer!: number;
-
-	constructor(shipsState: ShipsState) {
-		Object.assign(this, shipsState);
 	}
 }
 
