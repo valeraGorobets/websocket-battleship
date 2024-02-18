@@ -13,27 +13,27 @@ export function sendResponse(ws: WebSocket, response: Response): void {
 export function pageNotFoundController(controllerOptions: IControllerOptions): void {
 	const { request, connectionId, connectionToSocketDB }: IControllerOptions = controllerOptions;
 	const ws: WebSocket = connectionToSocketDB.get(connectionId)!;
-	const registrationResponse: Response = new Response({
+	const pageNotFoundResponse: Response = new Response({
 		type: request?.type,
 		data: {
 			error: true,
 			errorText: 'Unknown type send',
 		},
 	});
-	sendResponse(ws, registrationResponse);
+	sendResponse(ws, pageNotFoundResponse);
 }
 
 export function incorrectInputController(controllerOptions: IControllerOptions): void {
 	const { request, connectionId, connectionToSocketDB }: IControllerOptions = controllerOptions;
 	const ws: WebSocket = connectionToSocketDB.get(connectionId)!;
-	const registrationResponse: Response = new Response({
+	const incorrectInputResponse: Response = new Response({
 		type: request?.type,
 		data: {
 			error: true,
 			errorText: 'Incorrect items are sent in the input',
 		},
 	});
-	sendResponse(ws, registrationResponse);
+	sendResponse(ws, incorrectInputResponse);
 }
 
 export function wsCloseController(controllerOptions: IControllerOptions): void {

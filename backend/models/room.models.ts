@@ -7,21 +7,17 @@ export class Room {
 	public roomId: number = generateId();
 	public roomUsers: Player[] = [];
 	public gameStates?: GameState[];
-	private currentPlayerIndex: number = 0;
+	private currentPlayerIndex: number = -1;
 
 	constructor(room: Partial<Room> = {}) {
 		Object.assign(this, room);
-		this.setNextPlayerIndex();
+		this.currentPlayerIndex = this.roomUsers[0].index;
 	}
 
 	public setNextPlayerIndex(): void {
-		if (!this.currentPlayerIndex) {
-			this.currentPlayerIndex = this.roomUsers[0].index;
-		} else {
-			this.currentPlayerIndex = this.currentPlayerIndex === this.roomUsers[0].index
-				? this.roomUsers[1].index
-				: this.roomUsers[0].index;
-		}
+		this.currentPlayerIndex = this.currentPlayerIndex === this.roomUsers[0].index
+			? this.roomUsers[1].index
+			: this.roomUsers[0].index;
 	}
 
 	public getCurrentPlayerIndex(): number {

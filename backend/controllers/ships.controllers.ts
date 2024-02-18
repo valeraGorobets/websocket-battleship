@@ -52,7 +52,7 @@ export function tryStartGameResponseHandler(controllerOptions: IControllerOption
 		)!;
 	if (activeRoom.gameStates?.length === 2) {
 		activeRoom.gameStates.forEach((gameState: GameState) => {
-			const createGameResponse: Response = new Response({
+			const startGameResponse: Response = new Response({
 				type: RequestType.start_game,
 				data: {
 					ships: gameState.ships,
@@ -65,7 +65,7 @@ export function tryStartGameResponseHandler(controllerOptions: IControllerOption
 				.filter(([ _connectionId, playerIndex ]: [ number, number ]) => playerIndex === gameState.indexPlayer)![0][0];
 
 			const ws: WebSocket = connectionToSocketDB.get(playerConnection)!;
-			sendResponse(ws, createGameResponse);
+			sendResponse(ws, startGameResponse);
 		});
 		turnResponseHandler(activeRoom, false, controllerOptions);
 	}

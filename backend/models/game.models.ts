@@ -38,3 +38,12 @@ export class GameState {
 		Object.assign(this, gameState);
 	}
 }
+
+export class Winner {
+	public name!: string;
+	public wins: number = 0;
+
+	constructor(winner: Winner) {
+		Object.assign(this, winner);
+	}
+}

@@ -6,12 +6,14 @@ import { DB } from './db/db';
 import { Player } from './models/player.models';
 import { Room } from './models/room.models';
 import { generateId } from './services/utils';
+import { Winner } from './models/game.models';
 
 export function launchBattleShipGameServer(port: number): void {
 	const playerDB: DB<Player> = new DB();
 	const connectionToPlayerDB: DB<number> = new DB();
 	const roomDB: DB<Room> = new DB();
 	const connectionToSocketDB: DB<WebSocket> = new DB();
+	const winnersDB: DB<Winner> = new DB();
 
 	const wss = new WebSocketServer({ port });
 	wss.on('connection', (ws: WebSocket) => {
@@ -31,6 +33,7 @@ export function launchBattleShipGameServer(port: number): void {
 					playerDB,
 					connectionToPlayerIndexDB: connectionToPlayerDB,
 					roomDB,
+					winnersDB,
 				};
 				const controller: TController = resolveControllerForRequest(request);
 				controller(controllerOptions);
@@ -47,6 +50,7 @@ export function launchBattleShipGameServer(port: number): void {
 				playerDB,
 				connectionToPlayerIndexDB: connectionToPlayerDB,
 				roomDB,
+				winnersDB,
 			};
 			wsCloseController(controllerOptions);
 		});

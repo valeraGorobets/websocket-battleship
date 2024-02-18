@@ -14,6 +14,13 @@ export class BattleshipService {
 		}
 	}
 
+	public static areAllShipsKilled(opponentGameState: GameState): boolean {
+		return opponentGameState.ships
+			.every(({ shipCoordinateStatuses }: Ship) => shipCoordinateStatuses
+				.every(({ status }: CoordinateStatus) => status === AttackStatus.killed)
+			)
+	}
+
 	public static attack(attackPosition: IPosition, opponentGameState: GameState): CoordinateStatus[] {
 		let updatedCoordinateStatus: CoordinateStatus;
 		if (opponentGameState.shotPositions.find(({ x, y }: IPosition) => attackPosition.x === x && attackPosition.y === y)) {

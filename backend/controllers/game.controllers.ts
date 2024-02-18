@@ -1,9 +1,9 @@
 import { IControllerOptions, IPosition, RequestType, Response } from '../models/shared.models';
-import { incorrectInputController, sendResponse } from './common.contollers';
+import { incorrectInputController, notifyAllConnections, sendResponse } from './common.contollers';
 import { WebSocket } from 'ws';
 import { Room } from '../models/room.models';
 import { CoordinateStatus } from '../models/ship.models';
-import { AttackData, AttackStatus, GameState, RandomAttackData } from '../models/game.models';
+import { AttackData, AttackStatus, GameState, RandomAttackData, Winner } from '../models/game.models';
 import { BattleshipService } from '../services/battleship.service';
 import { Player } from '../models/player.models';
 
@@ -15,8 +15,8 @@ export function randomAttackController(controllerOptions: IControllerOptions): v
 	if (!room || !room.gameStates) {
 		incorrectInputController(controllerOptions);
 	}
-	const opponentShipState: GameState = getOpponentShipState(room!, randomAttackData.indexPlayer);
-	const randomPosition: IPosition | undefined = BattleshipService.getRandomPosition(opponentShipState);
+	const opponentGameState: GameState = getOpponentGameState(room!, randomAttackData.indexPlayer);
+	const randomPosition: IPosition | undefined = BattleshipService.getRandomPosition(opponentGameState);
 	if (!randomPosition) {
 		return;
 	}
@@ -31,6 +31,7 @@ export function attackController(controllerOptions: IControllerOptions): void {
 }
 
 function handleAttack(room: Room | undefined, attackData: AttackData, controllerOptions: IControllerOptions): void {
+	const { playerDB, winnersDB, roomDB }: IControllerOptions = controllerOptions;
 	if (!room || !room.gameStates) {
 		incorrectInputController(controllerOptions);
 	}
@@ -44,18 +45,34 @@ function handleAttack(room: Room | undefined, attackData: AttackData, controller
 		y: attackData.y,
 	}
 
-	const opponentShipState: GameState = getOpponentShipState(room, attackData.indexPlayer);
-	const coordinateStatuses: CoordinateStatus[] = BattleshipService.attack(attackPosition, opponentShipState);
-	coordinateStatuses.forEach((coordinateStatus: CoordinateStatus) => opponentShipState.shotPositions.push(coordinateStatus.position));
+	const opponentGameState: GameState = getOpponentGameState(room, attackData.indexPlayer);
+	const coordinateStatuses: CoordinateStatus[] = BattleshipService.attack(attackPosition, opponentGameState);
+	coordinateStatuses.forEach((coordinateStatus: CoordinateStatus) => opponentGameState.shotPositions.push(coordinateStatus.position));
 	if (coordinateStatuses.length) {
 		attackResponseHandler(room!, coordinateStatuses, controllerOptions);
 
 		const changeTurn: boolean = coordinateStatuses.every(({ status }: CoordinateStatus) => status === AttackStatus.miss);
-		turnResponseHandler(room!, changeTurn, controllerOptions);
+		const areAllShipsKilled: boolean = BattleshipService.areAllShipsKilled(opponentGameState);
+		if (areAllShipsKilled) {
+			finishResponseHandler(room, controllerOptions);
+			const winPlayerId: number = room.getCurrentPlayerIndex();
+			if (winPlayerId) {
+				const player: Player = playerDB.get(winPlayerId)!;
+				const currentState: Winner | undefined = winnersDB.get(winPlayerId);
+				winnersDB.add(winPlayerId, new Winner({
+					name: player.name,
+					wins: currentState ? currentState.wins + 1 : 1,
+				}));
+				roomDB.delete(room.roomId);
+			}
+			notifyAllConnections(updateWinnersResponseHandler, controllerOptions);
+		} else {
+			turnResponseHandler(room!, changeTurn, controllerOptions);
+		}
 	}
 }
 
-function getOpponentShipState(room: Room, indexPlayer: number) {
+function getOpponentGameState(room: Room, indexPlayer: number) {
 	return room!.gameStates!.find((gameState: GameState) => gameState.indexPlayer !== indexPlayer)!;
 }
 
@@ -69,7 +86,7 @@ export function turnResponseHandler(activeRoom: Room, changeTurn: boolean, contr
 	}
 	const currentPlayer: number = activeRoom.getCurrentPlayerIndex();
 	activeRoom.gameStates!.forEach((gameState: GameState) => {
-		const createGameResponse: Response = new Response({
+		const turnResponse: Response = new Response({
 			type: RequestType.turn,
 			data: {
 				currentPlayer,
@@ -81,7 +98,7 @@ export function turnResponseHandler(activeRoom: Room, changeTurn: boolean, contr
 			.filter(([ _connectionId, playerIndex ]: [ number, number ]) => playerIndex === gameState.indexPlayer)![0][0];
 
 		const ws: WebSocket = connectionToSocketDB.get(playerConnection)!;
-		sendResponse(ws, createGameResponse);
+		sendResponse(ws, turnResponse);
 	});
 }
 
@@ -92,7 +109,7 @@ export function attackResponseHandler(activeRoom: Room, coordinateStatuses: Coor
 	}: IControllerOptions = controllerOptions;
 	activeRoom.roomUsers!.forEach(({ index }: Player) => {
 		coordinateStatuses.forEach(({ position, status }: CoordinateStatus) => {
-			const createGameResponse: Response = new Response({
+			const attackResponse: Response = new Response({
 				type: RequestType.attack,
 				data: {
 					position,
@@ -106,7 +123,39 @@ export function attackResponseHandler(activeRoom: Room, coordinateStatuses: Coor
 				.filter(([ _connectionId, playerIndex ]: [ number, number ]) => playerIndex === index)![0][0];
 
 			const ws: WebSocket = connectionToSocketDB.get(playerConnection)!;
-			sendResponse(ws, createGameResponse);
+			sendResponse(ws, attackResponse);
 		});
 	});
+}
+
+export function finishResponseHandler(activeRoom: Room, controllerOptions: IControllerOptions): void {
+	const {
+		connectionToPlayerIndexDB,
+		connectionToSocketDB
+	}: IControllerOptions = controllerOptions;
+	activeRoom.roomUsers!.forEach(({ index }: Player) => {
+		const finishResponse: Response = new Response({
+			type: RequestType.finish,
+			data: {
+				winPlayer: activeRoom.getCurrentPlayerIndex(),
+			},
+		});
+
+		const playerConnection: number = connectionToPlayerIndexDB
+			.entries()
+			.filter(([ _connectionId, playerIndex ]: [ number, number ]) => playerIndex === index)![0][0];
+
+		const ws: WebSocket = connectionToSocketDB.get(playerConnection)!;
+		sendResponse(ws, finishResponse);
+	});
+}
+
+export function updateWinnersResponseHandler(ws: WebSocket, controllerOptions: IControllerOptions): void {
+	const { winnersDB }: IControllerOptions = controllerOptions;
+
+	const updateWinnersResponse: Response = new Response({
+		type: RequestType.update_winners,
+		data: winnersDB.values(),
+	});
+	sendResponse(ws, updateWinnersResponse);
 }

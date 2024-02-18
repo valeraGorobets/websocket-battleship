@@ -1,9 +1,10 @@
 import { Credentials, Player } from '../models/player.models';
-import { sendResponse } from './common.contollers';
+import { notifyAllConnections, sendResponse } from './common.contollers';
 import { IControllerOptions, RequestType, Response } from '../models/shared.models';
 import { WebSocket } from 'ws';
 import { updateRoomResponseHandler } from './room.controllers';
 import { DB } from '../db/db';
+import { updateWinnersResponseHandler } from './game.controllers';
 
 function isUserLoggedIn(credentials: Credentials, playerDB: DB<Player>) {
 	const credentialsHash: string = credentials.getHash();
@@ -28,7 +29,8 @@ export function registrationController(controllerOptions: IControllerOptions): v
 	playerDB.add(player.index, player);
 	connectionToPlayerIndexDB.add(connectionId, player.index);
 	registrationResponseHandler(ws, controllerOptions);
-	updateRoomResponseHandler(ws, controllerOptions);
+	notifyAllConnections(updateRoomResponseHandler, controllerOptions);
+	notifyAllConnections(updateWinnersResponseHandler, controllerOptions);
 }
 
 export function registrationResponseHandler(ws: WebSocket, controllerOptions: IControllerOptions): void {
@@ -48,12 +50,12 @@ export function registrationResponseHandler(ws: WebSocket, controllerOptions: IC
 }
 
 function registrationFailResponseHandler(ws: WebSocket, errorText: string): void {
-	const registrationResponse: Response = new Response({
+	const registrationFailResponse: Response = new Response({
 		type: RequestType.reg,
 		data: {
 			error: true,
 			errorText,
 		},
 	});
-	sendResponse(ws, registrationResponse);
+	sendResponse(ws, registrationFailResponse);
 }

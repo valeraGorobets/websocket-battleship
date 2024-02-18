@@ -2,6 +2,7 @@ import { WebSocket } from 'ws';
 import { DB } from '../db/db';
 import { Player } from './player.models';
 import { Room } from './room.models';
+import { Winner } from './game.models';
 
 export const FIELD_DIMENSION: number = 10;
 
@@ -29,6 +30,7 @@ export interface IControllerOptions {
 	connectionToPlayerIndexDB: DB<number>;
 	connectionToSocketDB: DB<WebSocket>;
 	roomDB: DB<Room>;
+	winnersDB: DB<Winner>;
 	request?: Request;
 }
 
