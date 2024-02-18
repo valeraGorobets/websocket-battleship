@@ -19,7 +19,7 @@ export class DB<T> {
 		return Array.from(this.db.values());
 	}
 
-	public entries(): [number, T][] {
+	public entries(): [ number, T ][] {
 		return Array.from(this.db.entries());
 	}
 }

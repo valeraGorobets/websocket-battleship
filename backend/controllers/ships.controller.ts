@@ -1,10 +1,10 @@
-import { IControllerOptions, IPosition, RequestType, Response } from '../models/shared.models';
+import { IControllerOptions, RequestType, Response } from '../models/shared.models';
 import { Player } from '../models/player.models';
-import { incorrectInputController, sendResponse } from './common.contollers';
+import { incorrectInputController, sendResponse } from './common.contoller';
 import { WebSocket } from 'ws';
 import { Room } from '../models/room.models';
 import { AddShipsData } from '../models/ship.models';
-import { turnResponseHandler } from './game.controllers';
+import { turnResponseHandler } from './game.controller';
 import { GameState } from '../models/game.models';
 
 export function addShipsController(controllerOptions: IControllerOptions): void {

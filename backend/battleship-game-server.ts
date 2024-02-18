@@ -1,7 +1,7 @@
 import { MessageEvent, WebSocket, WebSocketServer } from 'ws';
 import { resolveControllerForRequest } from './services/type-resolver.service';
 import { IControllerOptions, Request, TController } from './models/shared.models';
-import { wsCloseController } from './controllers/common.contollers';
+import { wsCloseController } from './controllers/common.contoller';
 import { DB } from './db/db';
 import { Player } from './models/player.models';
 import { Room } from './models/room.models';

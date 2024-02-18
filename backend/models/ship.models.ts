@@ -79,7 +79,7 @@ export class Ship {
 	}
 
 	private isValidPosition(position: IPosition): boolean {
-		return [position.x, position.y].every((coordinate: number) => coordinate >= 0 && coordinate < FIELD_DIMENSION)
+		return [ position.x, position.y ].every((coordinate: number) => coordinate >= 0 && coordinate < FIELD_DIMENSION)
 			&& !this.isCoordinateOfAShip(position);
 	}
 

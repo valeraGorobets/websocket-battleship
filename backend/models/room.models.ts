@@ -1,6 +1,5 @@
 import { Player } from './player.models';
 import { generateId } from '../services/utils';
-
 import { GameState } from './game.models';
 
 export class Room {

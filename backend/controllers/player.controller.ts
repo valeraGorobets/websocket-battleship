@@ -1,10 +1,10 @@
 import { Credentials, Player } from '../models/player.models';
-import { notifyAllConnections, sendResponse } from './common.contollers';
+import { notifyAllConnections, sendResponse } from './common.contoller';
 import { IControllerOptions, RequestType, Response } from '../models/shared.models';
 import { WebSocket } from 'ws';
-import { updateRoomResponseHandler } from './room.controllers';
+import { updateRoomResponseHandler } from './room.controller';
 import { DB } from '../db/db';
-import { updateWinnersResponseHandler } from './game.controllers';
+import { updateWinnersResponseHandler } from './game.controller';
 
 function isUserLoggedIn(credentials: Credentials, playerDB: DB<Player>) {
 	const credentialsHash: string = credentials.getHash();

@@ -1,5 +1,5 @@
 import { IControllerOptions, IPosition, RequestType, Response } from '../models/shared.models';
-import { incorrectInputController, notifyAllConnections, sendResponse } from './common.contollers';
+import { incorrectInputController, notifyAllConnections, sendResponse } from './common.contoller';
 import { WebSocket } from 'ws';
 import { Room } from '../models/room.models';
 import { CoordinateStatus } from '../models/ship.models';

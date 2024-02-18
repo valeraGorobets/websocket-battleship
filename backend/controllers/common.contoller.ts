@@ -1,6 +1,6 @@
 import { IControllerOptions, Response, THandler } from '../models/shared.models';
 import { WebSocket } from 'ws';
-import { removeUserFromGame } from './room.controllers';
+import { removeUserFromGame } from './room.controller';
 
 export function sendResponse(ws: WebSocket, response: Response): void {
 	try {
@@ -52,7 +52,7 @@ export function wsCloseController(controllerOptions: IControllerOptions): void {
 }
 
 export function notifyAllConnections(handler: THandler, controllerOptions: IControllerOptions): void {
-	const { connectionToSocketDB } = controllerOptions;
+	const { connectionToSocketDB }: IControllerOptions = controllerOptions;
 	connectionToSocketDB
 		.values()
 		.forEach((ws: WebSocket) => handler(ws, controllerOptions))

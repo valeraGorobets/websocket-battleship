@@ -1,9 +1,9 @@
-import { registrationController } from '../controllers/player.controllers';
+import { registrationController } from '../controllers/player.controller';
 import { Request, RequestType, TController } from '../models/shared.models';
-import { pageNotFoundController } from '../controllers/common.contollers';
-import { addUserToRoomController, createRoomController } from '../controllers/room.controllers';
-import { addShipsController } from '../controllers/ships.controllers';
-import { attackController, randomAttackController } from '../controllers/game.controllers';
+import { pageNotFoundController } from '../controllers/common.contoller';
+import { addUserToRoomController, createRoomController } from '../controllers/room.controller';
+import { addShipsController } from '../controllers/ships.controller';
+import { attackController, randomAttackController } from '../controllers/game.controller';
 
 class TypeConfig {
 	public type?: RequestType;

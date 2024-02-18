@@ -7,16 +7,17 @@ import { Winner } from './game.models';
 export const FIELD_DIMENSION: number = 10;
 
 export enum RequestType {
-	reg = 'reg',
+	add_ships = 'add_ships',
+	add_user_to_room = 'add_user_to_room',
+	attack = 'attack',
 	create_game = 'create_game',
 	create_room = 'create_room',
-	add_user_to_room = 'add_user_to_room',
-	add_ships = 'add_ships',
+	finish = 'finish',
+	randomAttack = 'randomAttack',
+	reg = 'reg',
+	single_play = 'single_play',
 	start_game = 'start_game',
 	turn = 'turn',
-	attack = 'attack',
-	randomAttack = 'randomAttack',
-	finish = 'finish',
 	update_room = 'update_room',
 	update_winners = 'update_winners',
 }

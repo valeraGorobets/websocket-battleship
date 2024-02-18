@@ -1,6 +1,6 @@
 import { IControllerOptions, RequestType, Response } from '../models/shared.models';
 import { Player } from '../models/player.models';
-import { incorrectInputController, notifyAllConnections, sendResponse } from './common.contollers';
+import { incorrectInputController, notifyAllConnections, sendResponse } from './common.contoller';
 import { WebSocket } from 'ws';
 import { AddUserToRoomData, Room } from '../models/room.models';
 
@@ -54,7 +54,7 @@ export function updateRoomResponseHandler(ws: WebSocket, controllerOptions: ICon
 	const roomData: any[] = roomDB
 		.values()
 		.filter(({ roomUsers }: Room) => roomUsers.length === 1)
-		.map(({ roomId, roomUsers }: Room) =>({ roomId, roomUsers }));
+		.map(({ roomId, roomUsers }: Room) => ({ roomId, roomUsers }));
 	const updateRoomResponse: Response = new Response({
 		type: RequestType.update_room,
 		data: roomData,
