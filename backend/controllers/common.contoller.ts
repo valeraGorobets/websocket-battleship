@@ -1,6 +1,9 @@
 import { IControllerOptions, Response, THandler } from '../models/shared.models';
 import { WebSocket } from 'ws';
-import { removeUserFromGame } from './room.controller';
+import { updateRoomResponseHandler } from './room.controller';
+import { Room } from '../models/room.models';
+import { Player } from '../models/player.models';
+import { endGame } from './game.controller';
 
 export function sendResponse(ws: WebSocket, response: Response): void {
 	try {
@@ -41,14 +44,26 @@ export function wsCloseController(controllerOptions: IControllerOptions): void {
 		connectionId,
 		playerDB,
 		connectionToPlayerIndexDB,
-		connectionToSocketDB
+		connectionToSocketDB,
+		roomDB,
 	}: IControllerOptions = controllerOptions;
 	console.log(`Closing WS: ${ connectionId }`);
 	const playerId: number = connectionToPlayerIndexDB.get(connectionId)!;
+
+	const activeRoom: Room = roomDB.values()
+		.find(({ roomUsers }: Room) => !!roomUsers
+			.find(({ index }: Player) => playerId === index)
+		)!;
+	if (!activeRoom) {
+		return;
+	}
+	const winPlayerId: number = activeRoom.roomUsers
+		.find(({ index }: Player) => playerId !== index)!.index;
+	endGame(activeRoom, winPlayerId, controllerOptions);
+	notifyAllConnections(updateRoomResponseHandler, controllerOptions);
 	playerDB.delete(playerId);
 	connectionToPlayerIndexDB.delete(connectionId);
 	connectionToSocketDB.delete(connectionId);
-	removeUserFromGame(playerId, controllerOptions);
 }
 
 export function notifyAllConnections(handler: THandler, controllerOptions: IControllerOptions): void {

@@ -7,6 +7,13 @@ import { AddUserToRoomData, Room } from '../models/room.models';
 export function createRoomController(controllerOptions: IControllerOptions): void {
 	const { connectionId, connectionToPlayerIndexDB, playerDB, roomDB }: IControllerOptions = controllerOptions;
 	const playerId: number = connectionToPlayerIndexDB.get(connectionId)!;
+	const isRoomCreated: boolean = !!roomDB.values()
+		.find(({ roomUsers }: Room) => !!roomUsers
+			.find(({ index }: Player) => playerId === index)
+		);
+	if (isRoomCreated) {
+		return;
+	}
 	const player: Player = playerDB.get(playerId)!;
 	const room: Room = new Room({
 		roomUsers: [ player ],
@@ -93,14 +100,4 @@ export function createGameResponseHandler(controllerOptions: IControllerOptions)
 		const ws: WebSocket = connectionToSocketDB.get(playerConnection)!;
 		sendResponse(ws, createGameResponse);
 	})
-}
-
-export function removeUserFromGame(playerId: number, controllerOptions: IControllerOptions) {
-	const { roomDB }: IControllerOptions = controllerOptions;
-	roomDB.entries().forEach(([ roomId, room ]: [ number, Room ]) => {
-		if (!!room.roomUsers.find(({ index }: Player) => index === playerId)) {
-			roomDB.delete(roomId);
-		}
-	});
-	notifyAllConnections(updateRoomResponseHandler, controllerOptions);
 }

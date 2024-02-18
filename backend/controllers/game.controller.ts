@@ -31,7 +31,6 @@ export function attackController(controllerOptions: IControllerOptions): void {
 }
 
 function handleAttack(room: Room | undefined, attackData: AttackData, controllerOptions: IControllerOptions): void {
-	const { playerDB, winnersDB, roomDB }: IControllerOptions = controllerOptions;
 	if (!room || !room.gameStates) {
 		incorrectInputController(controllerOptions);
 	}
@@ -54,18 +53,7 @@ function handleAttack(room: Room | undefined, attackData: AttackData, controller
 		const changeTurn: boolean = coordinateStatuses.every(({ status }: CoordinateStatus) => status === AttackStatus.miss);
 		const areAllShipsKilled: boolean = BattleshipService.areAllShipsKilled(opponentGameState);
 		if (areAllShipsKilled) {
-			finishResponseHandler(room, controllerOptions);
-			const winPlayerId: number = room.getCurrentPlayerIndex();
-			if (winPlayerId) {
-				const player: Player = playerDB.get(winPlayerId)!;
-				const currentState: Winner | undefined = winnersDB.get(winPlayerId);
-				winnersDB.add(winPlayerId, new Winner({
-					name: player.name,
-					wins: currentState ? currentState.wins + 1 : 1,
-				}));
-				roomDB.delete(room.roomId);
-			}
-			notifyAllConnections(updateWinnersResponseHandler, controllerOptions);
+			endGame(room, room.getCurrentPlayerIndex(), controllerOptions);
 		} else {
 			turnResponseHandler(room!, changeTurn, controllerOptions);
 		}
@@ -128,7 +116,7 @@ export function attackResponseHandler(activeRoom: Room, coordinateStatuses: Coor
 	});
 }
 
-export function finishResponseHandler(activeRoom: Room, controllerOptions: IControllerOptions): void {
+export function finishResponseHandler(activeRoom: Room, winPlayerId: number, controllerOptions: IControllerOptions): void {
 	const {
 		connectionToPlayerIndexDB,
 		connectionToSocketDB
@@ -137,7 +125,7 @@ export function finishResponseHandler(activeRoom: Room, controllerOptions: ICont
 		const finishResponse: Response = new Response({
 			type: RequestType.finish,
 			data: {
-				winPlayer: activeRoom.getCurrentPlayerIndex(),
+				winPlayer: winPlayerId,
 			},
 		});
 
@@ -158,4 +146,17 @@ export function updateWinnersResponseHandler(ws: WebSocket, controllerOptions: I
 		data: winnersDB.values(),
 	});
 	sendResponse(ws, updateWinnersResponse);
+}
+
+export function endGame(room: Room, winPlayerId: number, controllerOptions: IControllerOptions): void {
+	const { playerDB, winnersDB, roomDB }: IControllerOptions = controllerOptions;
+	finishResponseHandler(room, winPlayerId, controllerOptions);
+	const player: Player = playerDB.get(winPlayerId)!;
+	const currentState: Winner | undefined = winnersDB.get(winPlayerId);
+	winnersDB.add(winPlayerId, new Winner({
+		name: player.name,
+		wins: currentState ? currentState.wins + 1 : 1,
+	}));
+	roomDB.delete(room.roomId);
+	notifyAllConnections(updateWinnersResponseHandler, controllerOptions);
 }
