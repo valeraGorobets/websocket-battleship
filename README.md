@@ -5,6 +5,7 @@
 ## Installation
 1. Clone/download repo
 2. `npm install`
+3. In case 403 errors occur - remove the package-lock.json and try again
 
 ## Usage
 **Development**

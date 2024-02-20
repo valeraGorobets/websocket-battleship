@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "./",
+    "outDir": "./dist",
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2018",
+      "ESNext"
+    ],
+    "importHelpers": false,
+  },
+  "exclude": [
+    "./node_modules",
+  ],
+  "types": [
+    "node"
+  ],
+}
